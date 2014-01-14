@@ -16,8 +16,22 @@ server/
 temp/
 url/
 wanderlust/
+undohist/
 
 inits/00_*.el
 inits/99_*.el
 /bookmarks
+ac-comphist.dat
+abbrev_defs
 
+# Ignore .DS_Store
+.DS_Store
+
+# Ignore swap file
+*.swp
+
+# Ignore .dropbox
+.dropbox
+
+# Ignore "Icon\r"
+Icon^M^M      
