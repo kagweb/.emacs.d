@@ -1,4 +1,4 @@
-;; -*- Mode: Emacs-Lisp ; Coding: utf-8 -*-
+; -*- Mode: Emacs-Lisp ; Coding: utf-8 -*-
 
 ;; おまじない
 (require 'cl)
@@ -125,6 +125,8 @@
 
 
 
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 非表示関係
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -191,6 +193,18 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ELPA 関係
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(when (require 'pachage nil t)
+  ;; パッケージリポジトリにMarmaladeと開発者運営のELPAを追加
+  (add-to-list 'package-archives
+               '("marmalade" . "http://marmalade-repo.org/packages/"))
+  (add-to-list 'package-archives '("ELPA" . "http://tromey.com/elpa/"))
+  ;; インストールしたパッケージにロードパスを通して読み込む
+  (package-initialize))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; auto-install 関係
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -203,7 +217,7 @@
   ; プロキシの設定
   ;(setq url-proxy-services '(("http" . "localhost:8339")))
   ; install-elisp.elとコマンド名を同期
-  (auto-install-compatibility-setup))
+  (auto-install-compatibility-setup))  ; 互換性確保
 
 
 
@@ -215,6 +229,7 @@
 
 ;; anything
 ;; (auto-install-batch "anything")
+(require 'anything-startup)
 ;; (when (require 'anything nil t)
   (setq
    ;; 候補を表示するまでの時間。デフォルトは0.5
@@ -277,6 +292,9 @@
   ;; Command+d に anything-for-documentを割り当て
   (define-key global-map (kbd "s-d") 'anything-for-document)
   (global-set-key (kbd "C-;") 'anything)
+
+
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -394,7 +412,8 @@
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 
 (when (require 'multi-term nil t)
-  (setq multi-term-program shell-file-name))
+  (setq multi-term-program "/bin/zsh")
+  (setenv "TERMINFO" "~/.terminfo"))
 (add-hook 'term-mode-hook '(lambda ()
                  (define-key term-raw-map "\C-y" 'term-paste)
                  (define-key term-raw-map "\C-q" 'move-beginning-of-line)
@@ -419,10 +438,18 @@
 (setq file-name-coding-system 'utf-8-hfs)
 (setq locale-coding-system 'utf-8-hfs)
 (setq system-uses-terminfo nil)
-;; (when (require 'multi-term nil t)
-;;   (setq multi-term-program "/bin/bash"))
 
 
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Emacs Server 関係
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(require 'server)
+(unless (server-running-p)
+  (server-start))
 
 
 
@@ -613,12 +640,77 @@ and source-file directory for your debugger." t)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Objective-C 関係
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; objc-mode
+(add-to-list 'auto-mode-alist '("\\.mm?$" . objc-mode))
+(add-to-list 'auto-mode-alist '("\\.h$" . objc-mode))
+
+(add-to-list 'magic-mode-alist '("\\(.\\|\n\\)*\n@implementation" . objc-mode))
+(add-to-list 'magic-mode-alist '("\\(.\\|\n\\)*\n@interface" . objc-mode))
+(add-to-list 'magic-mode-alist '("\\(.\\|\n\\)*\n@protocol" . objc-mode))
+
+;; ヘッダファイル等を簡単に開く
+(ffap-bindings)
+;; 探すパスは ffap-c-path で設定する
+;; (setq ffap-c-path
+;;     '("/usr/include" "/usr/local/include"))
+;; 新規ファイルの場合には確認する
+(setq ffap-newfile-prompt t)
+;; ffap-kpathsea-expand-path で展開するパスの深さ
+(setq ffap-kpathsea-depth 5)
+
+(setq ff-other-file-alist
+      '(("\\.mm?$" (".h"))
+        ("\\.cc$"  (".hh" ".h"))
+        ("\\.hh$"  (".cc" ".C"))
+
+        ("\\.c$"   (".h"))
+        ("\\.h$"   (".c" ".cc" ".C" ".CC" ".cxx" ".cpp" ".m" ".mm"))
+
+        ("\\.C$"   (".H"  ".hh" ".h"))
+        ("\\.H$"   (".C"  ".CC"))
+
+        ("\\.CC$"  (".HH" ".H"  ".hh" ".h"))
+        ("\\.HH$"  (".CC"))
+
+        ("\\.cxx$" (".hh" ".h"))
+        ("\\.cpp$" (".hpp" ".hh" ".h"))
+
+        ("\\.hpp$" (".cpp" ".c"))))
+(add-hook 'objc-mode-hook
+         (lambda ()
+           (define-key c-mode-base-map (kbd "C-c o") 'ff-find-other-file)
+         ))
+
+;; インデント
+(add-hook 'c-mode-common-hook
+          '(lambda()
+             (c-set-style "cc-mode")
+             (setq indent-tabs-mode nil)
+             (setq indent-level 4)
+             (setq tab-width 4)))
+
+;; pysmell
+;(require 'pysmell)
+;(add-hook 'python-mode-hook (lambda () (pysmell-mode 1)))
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Lua 関係
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (autoload 'lua-mode "lua-mode" "Lua editing mode." t)
 (add-to-list 'auto-mode-alist '("\\.lua$" . lua-mode))
 (add-to-list 'interpreter-mode-alist '("lua" . lua-mode))
+
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; SCSS 関係
@@ -643,7 +735,7 @@ and source-file directory for your debugger." t)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; TeX 関係
+;; yaml 関係
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (require 'yaml-mode) (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
@@ -924,6 +1016,32 @@ and source-file directory for your debugger." t)
              (if (and (not (null buffer-file-name)) (file-writable-p buffer-file-name))
                  (flymake-mode t))
              ))
+
+;; Objective-C用設定
+(when (require 'flymake nil t)
+  (defvar xcode:sdkver "7.0")
+  (defvar xcode:sdkpath "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer")
+  (defvar xcode:sdk (concat xcode:sdkpath "/SDKs/iPhoneSimulator" xcode:sdkver ".sdk"))
+  (defvar flymake-objc-compiler (concat xcode:sdkpath "/usr/bin/gcc"))
+  (defvar flymake-objc-compiler-sdkver (concat "-mios-simulator-version-min=" xcode:sdkver))
+  (defvar flymake-objc-compile-default-options (list "-Wall" "-Wextra" "-fsyntax-only" "-ObjC" "-std=c99" "-isysroot" xcode:sdk flymake-objc-compiler-sdkver))
+  (defvar flymake-last-position nil)
+  (defvar flymake-objc-compile-options '("-I."))
+  (defun flymake-objc-init ()
+    (let* ((temp-file (flymake-init-create-temp-buffer-copy
+                       'flymake-create-temp-inplace))
+           (local-file (file-relative-name
+                        temp-file
+                        (file-name-directory buffer-file-name))))
+      (list flymake-objc-compiler (append flymake-objc-compile-default-options flymake-objc-compile-options (list local-file)))))
+  (add-hook 'objc-mode-hook
+            (lambda ()
+              ;; 拡張子 m と h に対して flymake を有効にする設定 flymake-mode t の前に書く必要があります
+              (push '("\\.m$" flymake-objc-init) flymake-allowed-file-name-masks)
+              (push '("\\.h$" flymake-objc-init) flymake-allowed-file-name-masks)
+              ;; 存在するファイルかつ書き込み可能ファイル時のみ flymake-mode を有効にします
+              (if (and (not (null buffer-file-name)) (file-writable-p buffer-file-name))
+                  (flymake-mode t)))))
 
 ;; perl用設定
 ;; (require 'set-perl5lib)
