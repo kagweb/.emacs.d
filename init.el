@@ -393,51 +393,51 @@
 ;; Emacsから本格的にシェルを使う
 ;; (install-elisp "http://www.emacswiki.org/emacs/download/multi-term.el")
 ;; shell の存在を確認
-(defun skt:shell ()
-  (or (executable-find "zsh")
-      (executable-find "bash")
-      (executable-find "cmdproxy")
-      (error "can't find 'shell' command in PATH!!")))
+;; (defun skt:shell ()
+;;   (or (executable-find "zsh")
+;;       (executable-find "bash")
+;;       (executable-find "cmdproxy")
+;;       (error "can't find 'shell' command in PATH!!")))
 
 ;; Shell 名の設定
-(setq shell-file-name (skt:shell))
-(setenv "SHELL" shell-file-name)
-(setq explicit-shell-file-name shell-file-name)
+;; (setq shell-file-name (skt:shell))
+;; (setenv "SHELL" shell-file-name)
+;; (setq explicit-shell-file-name shell-file-name)
 
 ;; Emacs が保持する terminfo を利用する
-(setq system-uses-terminfo nil)
+;; (setq system-uses-terminfo nil)
 
 ;; エスケープを綺麗に表示する
-(autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
-(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+;; (autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
+;; (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 
-(when (require 'multi-term nil t)
-  (setq multi-term-program "/bin/zsh")
-  (setenv "TERMINFO" "~/.terminfo"))
-(add-hook 'term-mode-hook '(lambda ()
-                 (define-key term-raw-map "\C-y" 'term-paste)
-                 (define-key term-raw-map "\C-q" 'move-beginning-of-line)
-                 (define-key term-raw-map "\C-f" 'forward-char)
-                 (define-key term-raw-map "\C-b" 'backward-char)
-                 (define-key term-raw-map "\C-t" 'set-mark-command)
-                 (define-key term-raw-map (kbd "ESC") 'term-send-raw)
-                 (define-key term-raw-map [delete] 'term-send-raw)
-                             (define-key term-raw-map "\C-z"
-                               (lookup-key (current-global-map) "\C-z"))))
-(global-set-key (kbd "C-c n") 'multi-term-next)
-(global-set-key (kbd "C-c p") 'multi-term-prev)
-(set-language-environment  'utf-8)
-(prefer-coding-system 'utf-8)
+;; (when (require 'multi-term nil t)
+;;   (setq multi-term-program "/bin/zsh")
+;;   (setenv "TERMINFO" "~/.terminfo"))
+;; (add-hook 'term-mode-hook '(lambda ()
+;;                  (define-key term-raw-map "\C-y" 'term-paste)
+;;                  (define-key term-raw-map "\C-q" 'move-beginning-of-line)
+;;                  (define-key term-raw-map "\C-f" 'forward-char)
+;;                  (define-key term-raw-map "\C-b" 'backward-char)
+;;                  (define-key term-raw-map "\C-t" 'set-mark-command)
+;;                  (define-key term-raw-map (kbd "ESC") 'term-send-raw)
+;;                  (define-key term-raw-map [delete] 'term-send-raw)
+;;                              (define-key term-raw-map "\C-z"
+;;                                (lookup-key (current-global-map) "\C-z"))))
+;; (global-set-key (kbd "C-c n") 'multi-term-next)
+;; (global-set-key (kbd "C-c p") 'multi-term-prev)
+;; (set-language-environment  'utf-8)
+;; (prefer-coding-system 'utf-8)
 ;; multi-term 呼び出しキーの割り当て
-(global-set-key (kbd "C-c t") '(lambda ()
-                                (interactive)
-                                (term shell-file-name)))
-(add-to-list 'term-unbind-key-list '"M-x")
+;; (global-set-key (kbd "C-c t") '(lambda ()
+;;                                 (interactive)
+;;                                 (term shell-file-name)))
+;; (add-to-list 'term-unbind-key-list '"M-x")
 
-(require 'ucs-normalize)
-(setq file-name-coding-system 'utf-8-hfs)
-(setq locale-coding-system 'utf-8-hfs)
-(setq system-uses-terminfo nil)
+;; (require 'ucs-normalize)
+;; (setq file-name-coding-system 'utf-8-hfs)
+;; (setq locale-coding-system 'utf-8-hfs)
+;; (setq system-uses-terminfo nil)
 
 
 
