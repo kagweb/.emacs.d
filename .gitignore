@@ -34,4 +34,7 @@ abbrev_defs
 .dropbox
 
 # Ignore "Icon\r"
-Icon^M^M      
+Icon^M^M
+
+recentf
+tramp
